@@ -22,7 +22,7 @@ object ParquetToKafka {
   def main(args: Array[String]) = {
     println("ParquetToKafka")
     val files = listFiles(dataPath)
-    files.take(3).foreach {
+    files.take(1).foreach {
       file => 
         println(s"Processing File ${file}")
         processFile(file.getAbsolutePath)
@@ -33,7 +33,7 @@ object ParquetToKafka {
     val records = readParquet(filePath)
     println(s"Loading ${records.size} from File ${filePath}")
     records.foreach { record =>
-      producer.send(new ProducerRecord(TOPIC, record.pingtimestamp.toString(), record.toJson))
+      producer.send(new ProducerRecord(TOPIC, s"${record.trj_id}:${record.pingtimestamp}", record.toJson))
     }
   }
 
@@ -48,10 +48,5 @@ object ParquetToKafka {
 
   def readParquet(filePath: String) = ParquetReader.read[Posisi](filePath)
 
-}
-
-case class Posisi(trj_id: String, driving_mode: String, osname: String, pingtimestamp: Long,
-                  rawlat: Double, rawlng: Double, speed: Double, bearing: Long, accuracy: Double) {
-  def toJson = s"""{"trj_id": "${trj_id}", "driving_mode":"${driving_mode}","osname":"${osname}", "pingtimestamp": ${pingtimestamp},"rawlat":${rawlat}, "rawlng": ${rawlng} , "speed":${speed}, "bearing":${bearing}, "accuracy": ${accuracy}}"""
 }
 
